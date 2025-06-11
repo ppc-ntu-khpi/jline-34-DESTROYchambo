@@ -1,5 +1,6 @@
 package com.mybank.tui;
 
+import com.mybank.domain.Account;
 import com.mybank.domain.Bank;
 import com.mybank.domain.CheckingAccount;
 import com.mybank.domain.Customer;
@@ -73,7 +74,7 @@ public class CLIdemo {
                         System.out.println(Bank.getCustomer(i).getLastName() + "\t\t" + Bank.getCustomer(i).getFirstName() + "\t\t$" + Bank.getCustomer(i).getAccount(0).getBalance());
                     }
                 } else {
-                    System.out.println(ANSI_RED+"Your bank has no customers!"+ANSI_RESET);
+                    System.out.println(ANSI_RED + "Your bank has no customers!" + ANSI_RESET);
                 }
 
             } else if (line.indexOf("customer") != -1) {
@@ -84,23 +85,54 @@ public class CLIdemo {
                         if (strNum != null) {
                             custNo = Integer.parseInt(strNum);
                         }
-                    }                    
+                    }
                     Customer cust = Bank.getCustomer(custNo);
                     String accType = cust.getAccount(0) instanceof CheckingAccount ? "Checkinh" : "Savings";
-                    
+
                     AttributedStringBuilder a = new AttributedStringBuilder()
                             .append("\nThis is detailed information about customer #")
                             .append(Integer.toString(custNo), AttributedStyle.BOLD.foreground(AttributedStyle.RED))
                             .append("!");
 
                     System.out.println(a.toAnsi());
-                    
+
                     System.out.println("\nLast name\tFirst Name\tAccount Type\tBalance");
                     System.out.println("-------------------------------------------------------");
                     System.out.println(cust.getLastName() + "\t\t" + cust.getFirstName() + "\t\t" + accType + "\t$" + cust.getAccount(0).getBalance());
                 } catch (Exception e) {
                     System.out
-                        .println(ANSI_RED + "ERROR! Wrong customer number!" + ANSI_RESET);
+                            .println(ANSI_RED + "ERROR! Wrong customer number!" + ANSI_RESET);
+                }
+            } else if ("report".equals(line)) {
+                System.out.println("\t\t\tCUSTOMERS REPORT");
+                System.out.println("\t\t\t================");
+
+                for (int cust_idx = 0;
+                        cust_idx < Bank.getNumberOfCustomers();
+                        cust_idx++) {
+                    Customer customer = Bank.getCustomer(cust_idx);
+
+                    System.out.println();
+                    System.out.println("Customer: "
+                            + customer.getLastName() + ", "
+                            + customer.getFirstName());
+
+                    for (int acct_idx = 0;
+                            acct_idx < customer.getNumberOfAccounts();
+                            acct_idx++) {
+                        Account account = customer.getAccount(acct_idx);
+                        String account_type = "";
+
+                        if (account instanceof SavingsAccount) {
+                            account_type = "Savings Account";
+                        } else if (account instanceof CheckingAccount) {
+                            account_type = "Checking Account";
+                        } else {
+                            account_type = "Unknown Account Type";
+                        }
+                        System.out.println("    " + account_type + ": current balance is "
+                                + account.getBalance());
+                    }
                 }
             } else if ("exit".equals(line)) {
                 System.out.println("Exiting application");
@@ -147,7 +179,8 @@ public class CLIdemo {
         Bank.addCustomer("Fox", "Mulder");
         Bank.getCustomer(0).addAccount(new CheckingAccount(2000));
         Bank.getCustomer(1).addAccount(new SavingsAccount(1000, 3));
-
+        Bank.addCustomer("David", "Goggins");
+        Bank.getCustomer(2).addAccount(new CheckingAccount(240));
         CLIdemo shell = new CLIdemo();
         shell.init();
         shell.run();
